@@ -2,10 +2,125 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="refresh" content="0; url=catalogo_brecoto.html">
-<title>Catálogo BRECOTO® · SG C.A.</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>BRECOTO® · SG C.A.</title>
+<meta name="description" content="Catálogo digital BRECOTO — repuestos y accesorios.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@700;800;900&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --blue-dark:#0A2C6B; --blue:#0E3A8C;
+    --green:#1FA637; --green-dark:#178A2C;
+    --seam:#0b0f14;
+    --coral:#FF5A54; --mint:#7CFF9A;
+    --ink:#141A22; --muted:#69727E;
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+  html,body{height:100%;}
+  body{
+    margin:0; color:#fff; font-family:'Inter',sans-serif;
+    -webkit-font-smoothing:antialiased;
+    background:linear-gradient(118deg, var(--blue-dark) 0%, var(--blue) 46%, var(--seam) 49.6%, var(--seam) 50.4%, var(--green-dark) 54%, var(--green) 100%);
+    min-height:100dvh;
+    display:flex; align-items:center; justify-content:center;
+    padding:24px;
+    position:relative;
+    overflow:hidden;
+  }
+  body::before{
+    content:''; position:absolute; inset:0;
+    background-image:radial-gradient(rgba(255,255,255,.5) 1px, transparent 1px);
+    background-size:18px 18px;
+    opacity:.08;
+    pointer-events:none;
+  }
+  .card{
+    position:relative; z-index:1;
+    width:100%; max-width:440px;
+    text-align:center;
+    display:flex; flex-direction:column; align-items:center;
+    animation:rise .6s cubic-bezier(.2,.8,.2,1) both;
+  }
+  @keyframes rise{ from{opacity:0; transform:translateY(14px);} to{opacity:1; transform:translateY(0);} }
+  @media (prefers-reduced-motion:reduce){ .card{animation:none;} }
+
+  .mark{
+    width:64px; height:64px; border-radius:18px;
+    background:rgba(255,255,255,.12);
+    border:1px solid rgba(255,255,255,.22);
+    backdrop-filter:blur(6px);
+    display:flex; align-items:center; justify-content:center;
+    margin-bottom:22px;
+  }
+  .mark svg{width:30px; height:30px;}
+
+  .wordmark{
+    font-family:'Archivo'; font-weight:900; font-size:clamp(34px,9vw,46px);
+    letter-spacing:-.03em; line-height:1; margin:0;
+  }
+  .wordmark .b{color:var(--coral);}
+  .wordmark sup{
+    font-size:13px; font-weight:700; color:rgba(255,255,255,.65);
+    vertical-align:super; margin-left:2px;
+  }
+  .sub{
+    font-family:'IBM Plex Mono'; font-size:11px; letter-spacing:.14em;
+    text-transform:uppercase; color:rgba(255,255,255,.6);
+    margin:10px 0 0;
+  }
+
+  h1{
+    font-family:'Archivo'; font-weight:800; font-size:clamp(22px,5.5vw,28px);
+    line-height:1.25; letter-spacing:-.01em;
+    margin:34px 0 10px;
+    text-wrap:balance;
+  }
+  h1 .hl{color:var(--mint);}
+  p.lead{
+    font-size:15px; line-height:1.55; color:rgba(255,255,255,.78);
+    max-width:34ch; margin:0 0 34px;
+  }
+
+  .cta{
+    display:inline-flex; align-items:center; gap:10px;
+    background:#fff; color:var(--ink);
+    font-family:'Archivo'; font-weight:800; font-size:16px;
+    padding:16px 30px; border-radius:14px;
+    text-decoration:none;
+    box-shadow:0 10px 26px rgba(0,0,0,.28);
+    transition:transform .15s ease, box-shadow .15s ease;
+  }
+  .cta:hover{ transform:translateY(-2px); box-shadow:0 14px 30px rgba(0,0,0,.32); }
+  .cta:active{ transform:translateY(0); }
+  .cta:focus-visible{ outline:3px solid var(--mint); outline-offset:3px; }
+  .cta svg{width:18px; height:18px; transition:transform .15s ease;}
+  .cta:hover svg{ transform:translateX(3px); }
+
+  footer{
+    margin-top:30px; font-family:'IBM Plex Mono'; font-size:10.5px;
+    color:rgba(255,255,255,.45); letter-spacing:.02em;
+  }
+</style>
 </head>
 <body>
-<p>Cargando el catálogo… si no avanza automáticamente, <a href="catalogo_brecoto.html">haz clic aquí</a>.</p>
+  <main class="card">
+    <div class="mark" aria-hidden="true">
+      <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.5"><circle cx="12" cy="12" r="9"/><path d="M8 12.5l2.5 2.5L16 9.5"/></svg>
+    </div>
+
+    <p class="wordmark"><span class="b">B</span>RECOTO<sup>®</sup></p>
+    <p class="sub">SG C.A.</p>
+
+    <h1>Bienvenido<span class="hl">.</span> Tu catálogo está listo para ver.</h1>
+    <p class="lead">Explora los productos disponibles, precios actualizados y arma tu pedido directo por WhatsApp.</p>
+
+    <a class="cta" href="catalogo_brecoto.html">
+      Ver catálogo
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+    </a>
+
+    <footer>Catálogo digital BRECOTO</footer>
+  </main>
 </body>
 </html>
