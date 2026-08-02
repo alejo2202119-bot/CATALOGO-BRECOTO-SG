@@ -398,24 +398,25 @@ function closeCart(){ document.getElementById("drawer").classList.remove("open")
 function buildWaUrl(){
   const now = new Date(), pad = n=>String(n).padStart(2,"0");
   const num = `${now.getFullYear()}${pad(now.getMonth()+1)}${pad(now.getDate())}-${pad(now.getHours())}${pad(now.getMinutes())}`;
+  const fecha = `${pad(now.getDate())}/${pad(now.getMonth()+1)}/${now.getFullYear()} ${pad(now.getHours())}:${pad(now.getMinutes())}`;
   const entries = Object.entries(cart);
   let total = 0, unidades = 0;
-  const lineas = entries.map(([sku,q])=>{
+  const lineas = entries.map(([sku,q], i)=>{
     const p = PRODUCTS.find(x=>x.sku===sku);
     const sub = p.price*q; total += sub; unidades += q;
-    return `▪ ${q}x ${p.name}\n   ${p.sku} · USD ${p.price.toFixed(2)} c/u = USD ${sub.toFixed(2)}`;
+    return `${i+1}. ${p.name} (${p.sku})\n   Cantidad: ${q} · USD ${p.price.toFixed(2)} c/u · Subtotal: USD ${sub.toFixed(2)}`;
   });
   const msg = [
-    "🔧 *PEDIDO BRECOTO*",
-    `Pedido N° ${num}`,
+    "*PEDIDO BRECOTO*",
+    `N° ${num} · ${fecha}`,
     "",
     "Hola, quiero confirmar este pedido:",
     "",
     ...lineas,
     "",
-    "━━━━━━━━━━━━━",
-    `*TOTAL: USD ${total.toFixed(2)}*`,
+    "-----------------------------",
     `${entries.length} producto(s) · ${unidades} unidad(es)`,
+    `*TOTAL: USD ${total.toFixed(2)}*`,
     "",
     "Quedo atento para coordinar pago y entrega. ¡Gracias!"
   ].join("\n");
