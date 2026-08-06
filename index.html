@@ -34,20 +34,20 @@
 
   main{
     width:100%; max-width:600px;
-    padding:16px 20px 18px;
+    padding:20px 20px 22px;
     display:flex; flex-direction:column; align-items:center;
-    gap:9px;
+    gap:12px;
     text-align:center;
   }
 
   .eyebrow{
-    font-family:'IBM Plex Mono',monospace; font-size:9.5px; font-weight:600;
+    font-family:'IBM Plex Mono',monospace; font-size:10.5px; font-weight:600;
     letter-spacing:.12em; text-transform:uppercase; color:var(--white-70);
     margin:0;
   }
 
   .frame{
-    width:100%; max-width:400px;
+    width:100%; max-width:420px;
     overflow:hidden; border-radius:0;
     box-shadow:var(--shadow); border:3px solid #fff;
     background:var(--surface);
@@ -60,10 +60,10 @@
 
   h1{
     font-family:'Archivo',sans-serif; font-weight:900;
-    font-size:30px;
-    line-height:1.02; letter-spacing:-.02em;
+    font-size:38px;
+    line-height:1.03; letter-spacing:-.02em;
     margin:2px 0 0; color:#fff;
-    white-space:nowrap;
+    text-wrap:balance;
     animation:rise .6s .08s cubic-bezier(.2,.8,.2,1) both;
   }
   h1 .dot{color:var(--coral);}
@@ -71,20 +71,20 @@
 
   p.welcome-sub{
     font-family:'Archivo',sans-serif; font-weight:700;
-    font-size:12.5px; line-height:1.35; color:#fff;
-    max-width:30ch; margin:0;
+    font-size:14px; line-height:1.35; color:#fff;
+    max-width:32ch; margin:0;
   }
 
   p.lead{
-    font-size:11.5px; line-height:1.4; color:var(--white-90);
+    font-size:12.5px; line-height:1.42; color:var(--white-90);
     max-width:36ch; margin:0;
   }
 
   .cta{
     display:inline-flex; align-items:center; gap:9px;
     background:#fff; color:var(--blue);
-    font-family:'Archivo',sans-serif; font-weight:800; font-size:14px;
-    padding:11px 26px; border-radius:13px;
+    font-family:'Archivo',sans-serif; font-weight:800; font-size:15px;
+    padding:13px 28px; border-radius:13px;
     text-decoration:none;
     margin-top:3px;
     box-shadow:0 12px 28px rgba(6,20,20,.32);
@@ -93,11 +93,11 @@
   .cta:hover{ background:var(--green); color:#fff; transform:translateY(-2px); box-shadow:0 16px 32px rgba(6,20,20,.38); }
   .cta:active{ transform:translateY(0); }
   .cta:focus-visible{ outline:3px solid #fff; outline-offset:3px; }
-  .cta svg{width:17px; height:17px; transition:transform .15s ease;}
+  .cta svg{width:18px; height:18px; transition:transform .15s ease;}
   .cta:hover svg{ transform:translateX(3px); }
 
   footer{
-    font-family:'IBM Plex Mono',monospace; font-size:9px;
+    font-family:'IBM Plex Mono',monospace; font-size:10px;
     color:var(--white-70); letter-spacing:.02em; flex-shrink:0;
   }
 
