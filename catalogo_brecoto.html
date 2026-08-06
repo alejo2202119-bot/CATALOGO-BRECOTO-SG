@@ -169,6 +169,10 @@
   .admin-flag button.ghost{background:transparent; color:#fff; border:1px solid rgba(255,255,255,.6);}
   body.admin .badge{cursor:pointer; box-shadow:0 0 0 2px var(--blue);}
   body.admin .price-edit{cursor:text; border-bottom:1.5px dashed var(--blue);}
+  .photo-edit{display:none;}
+  body.admin .photo-edit{position:absolute; bottom:9px; right:9px; z-index:2; display:flex; align-items:center; justify-content:center; width:30px; height:30px; border-radius:9px; border:none; background:var(--blue); color:#fff; box-shadow:0 4px 10px rgba(14,58,140,.35); cursor:pointer;}
+  body.admin .photo-edit svg{width:15px; height:15px;}
+  body.admin .photo{cursor:default;}
 
   @media(min-width:720px){
     body{padding-bottom:0;}
@@ -189,7 +193,7 @@
 <body>
 
 <div class="admin-flag">
-  <span class="txt">MODO EDICIÓN activo · toca estado, precio o nombre para cambiar</span>
+  <span class="txt">MODO EDICIÓN activo · toca estado, precio, nombre o el ícono de la foto para cambiar</span>
   <span class="acts">
     <button onclick="addProduct()">＋ Producto</button>
     <button onclick="downloadCatalog()">Descargar</button>
@@ -348,10 +352,14 @@ let query = "";
 function loadOverrides(){ try{ return JSON.parse(localStorage.getItem("brecoto_ov")||"{}"); }catch(e){ return {}; } }
 function saveOverrides(){ try{ localStorage.setItem("brecoto_ov", JSON.stringify(overrides)); }catch(e){} }
 let overrides = loadOverrides();
+function loadExtraProducts(){ try{ return JSON.parse(localStorage.getItem("brecoto_extra")||"[]"); }catch(e){ return []; } }
+function saveExtraProducts(){ try{ localStorage.setItem("brecoto_extra", JSON.stringify(extraProducts)); }catch(e){} }
+let extraProducts = loadExtraProducts();
+PRODUCTS = PRODUCTS.concat(extraProducts);
 function applyOverrides(){
   PRODUCTS.forEach(p=>{
     const o = overrides[p.sku];
-    if(o){ if(o.stock) p.stock=o.stock; if(o.price!=null) p.price=o.price; if(o.name) p.name=o.name; }
+    if(o){ if(o.stock) p.stock=o.stock; if(o.price!=null) p.price=o.price; if(o.name) p.name=o.name; if(o.photo) p.photo=o.photo; }
   });
 }
 applyOverrides();
@@ -387,6 +395,7 @@ function cardHTML(p){
   const pending = p.price==null;
   const media = p.photo ? `<img src="${p.photo}" alt="${esc(p.name)}" onclick="openLightbox(this)">` : `<svg class="placeholder" viewBox="0 0 24 24">${CAT_ICON[p.cat]||''}</svg>`;
   const badge = `<span class="badge ${isOut?'out':'ok'}" onclick="toggleStock('${p.sku}')">${isOut?'Agotado':'Disponible'}</span>`;
+  const photoEdit = `<button class="photo-edit" onclick="editPhoto('${p.sku}')" title="Cambiar foto"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg></button>`;
   let action;
   if(pending){
     action = `<button class="add" disabled title="Precio pendiente">＋</button>`;
@@ -405,7 +414,7 @@ function cardHTML(p){
     ? `<div class="price-pending price-edit" onclick="editPrice('${p.sku}')">Precio pronto</div>`
     : `<div class="price price-edit" onclick="editPrice('${p.sku}')"><span class="cur">USD</span>${p.price.toFixed(2)}</div>`;
   return `<div class="card ${isOut?'is-out':''}">
-    <div class="photo">${badge}${media}</div>
+    <div class="photo">${badge}${media}${photoEdit}</div>
     <div class="card-body">
       <div class="p-name" data-sku="${p.sku}" onclick="editName('${p.sku}')">${esc(p.name)}</div>
       <div class="p-meta">${p.sku}</div>
@@ -550,13 +559,57 @@ function editName(sku){
   if(v===null || !v.trim()) return;
   p.name = v.trim(); overrides[sku] = Object.assign({}, overrides[sku], {name:p.name}); saveOverrides(); sync();
 }
+function pickImage(callback){
+  const input = document.createElement("input");
+  input.type = "file"; input.accept = "image/*";
+  input.onchange = () => {
+    const file = input.files && input.files[0];
+    if(!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      const img = new Image();
+      img.onload = () => {
+        const maxDim = 700;
+        let w = img.width, h = img.height;
+        if(Math.max(w,h) > maxDim){ const s = maxDim/Math.max(w,h); w = Math.round(w*s); h = Math.round(h*s); }
+        const canvas = document.createElement("canvas");
+        canvas.width = w; canvas.height = h;
+        canvas.getContext("2d").drawImage(img, 0, 0, w, h);
+        callback(canvas.toDataURL("image/jpeg", 0.82));
+      };
+      img.src = reader.result;
+    };
+    reader.readAsDataURL(file);
+  };
+  input.click();
+}
+function editPhoto(sku){
+  if(!document.body.classList.contains("admin")) return;
+  const p = PRODUCTS.find(x=>x.sku===sku);
+  pickImage((dataUrl)=>{
+    p.photo = dataUrl;
+    overrides[sku] = Object.assign({}, overrides[sku], {photo:dataUrl}); saveOverrides();
+    const extra = extraProducts.find(x=>x.sku===sku);
+    if(extra) extra.photo = dataUrl, saveExtraProducts();
+    sync();
+  });
+}
 function addProduct(){
   const name = prompt("Nombre del repuesto:"); if(!name||!name.trim()) return;
   const cat = prompt("Categoría ("+CATEGORIES.join(" / ")+"):", CATEGORIES[0]); if(!cat) return;
   const price = parseFloat((prompt("Precio USD:","0")||"0").replace(",",".")); if(isNaN(price)){ alert("Precio no válido."); return; }
   const sku = (prompt("Código (SKU):","NUEVO-"+(PRODUCTS.length+1))||"").trim(); if(!sku) return;
-  PRODUCTS.push({name:name.trim(), sku, cat:cat.trim(), price, stock:"in"});
-  sync(); alert("Producto agregado. Recuerda tocar \"Descargar\" para guardarlo de forma permanente.");
+  const nuevo = {name:name.trim(), sku, cat:cat.trim(), price, stock:"in"};
+  PRODUCTS.push(nuevo); extraProducts.push(nuevo); saveExtraProducts();
+  sync();
+  if(confirm("Producto agregado. ¿Deseas agregarle una foto ahora?")){
+    pickImage((dataUrl)=>{
+      nuevo.photo = dataUrl; saveExtraProducts(); sync();
+      alert("Foto agregada. Recuerda tocar \"Descargar\" para guardarlo de forma permanente en el catálogo de todos.");
+    });
+  } else {
+    alert("Recuerda tocar \"Descargar\" para guardarlo de forma permanente en el catálogo de todos.");
+  }
 }
 
 /* ---- descargar catálogo actualizado (para re-subir) ---- */
@@ -572,7 +625,7 @@ function downloadCatalog(){
   a.href = URL.createObjectURL(blob);
   a.download = "catalogo_brecoto.html";
   document.body.appendChild(a); a.click(); a.remove();
-  alert("Catálogo descargado. Sube ese archivo a tu hosting para que todos vean los cambios.");
+  alert("Catálogo descargado. Envía ese archivo para publicarlo y que todos vean los cambios en el link.");
 }
 
 renderChips(); renderCatalog(); sync();
