@@ -415,8 +415,14 @@ function applyOverrides(){
 }
 applyOverrides();
 
+function allCats(){
+  const extra = [...new Set(PRODUCTS.map(p=>p.cat))]
+    .filter(c=>!CATEGORIES.includes(c))
+    .sort((a,b)=>a.localeCompare(b,'es',{sensitivity:'base'}));
+  return [...CATEGORIES, ...extra];
+}
 function renderChips(){
-  const all = ["Todos", ...CATEGORIES];
+  const all = ["Todos", ...allCats()];
   document.getElementById("chips").innerHTML = all.map(c=>
     `<button class="chip ${c===activeCat?'active':''}" onclick="setCat('${c.replace(/'/g,"\\'")}')">${c}</button>`
   ).join("");
@@ -427,7 +433,7 @@ function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').rep
 
 function renderCatalog(){
   const q = query.trim().toLowerCase();
-  const cats = activeCat==="Todos" ? CATEGORIES : [activeCat];
+  const cats = activeCat==="Todos" ? allCats() : [activeCat];
   let html = ""; let anyShown = false;
   cats.forEach(cat=>{
     const items = PRODUCTS.filter(p=> p.cat===cat && (!q || (p.name+" "+p.sku).toLowerCase().includes(q)))
@@ -649,7 +655,11 @@ function editPhoto(sku){
 }
 function addProduct(){
   const name = prompt("Nombre del repuesto:"); if(!name||!name.trim()) return;
-  const cat = prompt("Categoría ("+CATEGORIES.join(" / ")+"):", CATEGORIES[0]); if(!cat) return;
+  let cat = prompt("Categoría ("+CATEGORIES.join(" / ")+"):", CATEGORIES[0]); if(!cat) return;
+  cat = cat.trim();
+  const norm = s => s.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g,"");
+  const catMatch = CATEGORIES.find(c => norm(c)===norm(cat));
+  if(catMatch) cat = catMatch;
   const price = parseFloat((prompt("Precio USD:","0")||"0").replace(",",".")); if(isNaN(price)){ alert("Precio no válido."); return; }
   const sku = (prompt("Código (SKU):","NUEVO-"+(PRODUCTS.length+1))||"").trim(); if(!sku) return;
   const nuevo = {name:name.trim(), sku, cat:cat.trim(), price, stock:"in"};
