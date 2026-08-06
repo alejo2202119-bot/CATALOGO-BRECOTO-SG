@@ -431,19 +431,22 @@ function setCat(c){ activeCat=c; renderChips(); renderCatalog(); }
 
 function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 
+const nameCompare = (a,b)=> a.name.localeCompare(b.name, 'es', {sensitivity:'base', numeric:true});
+
 function renderCatalog(){
   const q = query.trim().toLowerCase();
-  const cats = activeCat==="Todos" ? allCats() : [activeCat];
-  let html = ""; let anyShown = false;
-  cats.forEach(cat=>{
-    const items = PRODUCTS.filter(p=> p.cat===cat && (!q || (p.name+" "+p.sku).toLowerCase().includes(q)))
-      .sort((a,b)=> a.name.localeCompare(b.name, 'es', {sensitivity:'base', numeric:true}));
-    if(items.length===0) return;
-    anyShown = true;
-    html += `<div class="cat-label"><h2>${esc(cat)}</h2><span class="rule"></span><span class="cnt">${items.length}</span></div>`;
-    html += `<div class="grid">` + items.map(cardHTML).join("") + `</div>`;
-  });
-  if(!anyShown) html = `<div class="grid"><div class="empty"><div class="big">Sin resultados</div>Prueba con otro nombre o código, o cambia de categoría.</div></div>`;
+  let html = "";
+  if(activeCat==="Todos"){
+    const items = PRODUCTS.filter(p=> !q || (p.name+" "+p.sku).toLowerCase().includes(q)).sort(nameCompare);
+    html = items.length
+      ? `<div class="cat-label"><h2>Todos los productos</h2><span class="rule"></span><span class="cnt">${items.length}</span></div><div class="grid">${items.map(cardHTML).join("")}</div>`
+      : `<div class="grid"><div class="empty"><div class="big">Sin resultados</div>Prueba con otro nombre o código, o cambia de categoría.</div></div>`;
+  } else {
+    const items = PRODUCTS.filter(p=> p.cat===activeCat && (!q || (p.name+" "+p.sku).toLowerCase().includes(q))).sort(nameCompare);
+    html = items.length
+      ? `<div class="cat-label"><h2>${esc(activeCat)}</h2><span class="rule"></span><span class="cnt">${items.length}</span></div><div class="grid">${items.map(cardHTML).join("")}</div>`
+      : `<div class="grid"><div class="empty"><div class="big">Sin resultados</div>Prueba con otro nombre o código, o cambia de categoría.</div></div>`;
+  }
   document.getElementById("catalog").innerHTML = html;
 }
 
