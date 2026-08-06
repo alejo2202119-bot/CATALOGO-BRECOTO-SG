@@ -430,7 +430,8 @@ function renderCatalog(){
   const cats = activeCat==="Todos" ? CATEGORIES : [activeCat];
   let html = ""; let anyShown = false;
   cats.forEach(cat=>{
-    const items = PRODUCTS.filter(p=> p.cat===cat && (!q || (p.name+" "+p.sku).toLowerCase().includes(q)));
+    const items = PRODUCTS.filter(p=> p.cat===cat && (!q || (p.name+" "+p.sku).toLowerCase().includes(q)))
+      .sort((a,b)=> a.name.localeCompare(b.name, 'es', {sensitivity:'base', numeric:true}));
     if(items.length===0) return;
     anyShown = true;
     html += `<div class="cat-label"><h2>${esc(cat)}</h2><span class="rule"></span><span class="cnt">${items.length}</span></div>`;
