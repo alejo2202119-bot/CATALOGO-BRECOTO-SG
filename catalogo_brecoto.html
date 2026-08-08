@@ -186,6 +186,7 @@
     main{max-width:1080px; margin:0 auto;}
     .grid{grid-template-columns:repeat(auto-fill,minmax(220px,1fr)); gap:16px;}
     .header-top,.search-row,.chips,.hero,.slogan{max-width:1080px; margin-left:auto; margin-right:auto;}
+    .hero img{max-height:340px; object-fit:cover; object-position:center;}
     .cart-bar{max-width:420px; left:auto; right:24px; bottom:24px; padding:0; background:none;}
     .cart-bar button{border-radius:16px;}
     .drawer{left:auto; right:0; top:0; bottom:0; width:min(420px,100%); max-height:none; border-radius:0; transform:translateX(100%);}
@@ -457,17 +458,18 @@ function setCat(c){ activeCat=c; renderChips(); renderCatalog(); }
 function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 
 const nameCompare = (a,b)=> a.name.localeCompare(b.name, 'es', {sensitivity:'base', numeric:true});
+function normalizeSearch(s){ return String(s).toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g,""); }
 
 function renderCatalog(){
-  const q = query.trim().toLowerCase();
+  const q = normalizeSearch(query.trim());
   let html = "";
   if(activeCat==="Todos"){
-    const items = PRODUCTS.filter(p=> !q || (p.name+" "+p.sku).toLowerCase().includes(q)).sort(nameCompare);
+    const items = PRODUCTS.filter(p=> !q || normalizeSearch(p.name+" "+p.sku).includes(q)).sort(nameCompare);
     html = items.length
       ? `<div class="cat-label"><h2>Todos los productos</h2><span class="rule"></span><span class="cnt">${items.length}</span></div><div class="grid">${items.map(cardHTML).join("")}</div>`
       : `<div class="grid"><div class="empty"><div class="big">Sin resultados</div>Prueba con otro nombre o código, o cambia de categoría.</div></div>`;
   } else {
-    const items = PRODUCTS.filter(p=> p.cat===activeCat && (!q || (p.name+" "+p.sku).toLowerCase().includes(q))).sort(nameCompare);
+    const items = PRODUCTS.filter(p=> p.cat===activeCat && (!q || normalizeSearch(p.name+" "+p.sku).includes(q))).sort(nameCompare);
     html = items.length
       ? `<div class="cat-label"><h2>${esc(activeCat)}</h2><span class="rule"></span><span class="cnt">${items.length}</span></div><div class="grid">${items.map(cardHTML).join("")}</div>`
       : `<div class="grid"><div class="empty"><div class="big">Sin resultados</div>Prueba con otro nombre o código, o cambia de categoría.</div></div>`;
