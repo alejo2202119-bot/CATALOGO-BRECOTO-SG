@@ -598,9 +598,17 @@ function sendWhatsapp(){
 
 /* ---- búsqueda ---- */
 document.getElementById("search").addEventListener("input", e=>{
+  const hadQuery = !!query;
   query = e.target.value;
   document.getElementById("clearSearch").style.display = query ? "block" : "none";
   renderCatalog();
+  if(query && !hadQuery){
+    requestAnimationFrame(()=>{
+      const headerH = document.querySelector("header").getBoundingClientRect().height;
+      const catalogTop = document.getElementById("catalog").getBoundingClientRect().top + window.scrollY;
+      window.scrollTo({top: catalogTop - headerH, behavior:"smooth"});
+    });
+  }
 });
 function clearSearch(){ query=""; document.getElementById("search").value=""; document.getElementById("clearSearch").style.display="none"; renderCatalog(); }
 
