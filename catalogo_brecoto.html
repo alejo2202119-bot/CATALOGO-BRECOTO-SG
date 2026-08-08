@@ -462,14 +462,16 @@ function normalizeSearch(s){ return String(s).toLowerCase().normalize("NFD").rep
 
 function renderCatalog(){
   const q = normalizeSearch(query.trim());
+  const isAdmin = document.body.classList.contains("admin");
+  const visible = p => isAdmin || p.stock!=="out";
   let html = "";
   if(activeCat==="Todos"){
-    const items = PRODUCTS.filter(p=> !q || normalizeSearch(p.name+" "+p.sku).includes(q)).sort(nameCompare);
+    const items = PRODUCTS.filter(p=> visible(p) && (!q || normalizeSearch(p.name+" "+p.sku).includes(q))).sort(nameCompare);
     html = items.length
       ? `<div class="cat-label"><h2>Todos los productos</h2><span class="rule"></span><span class="cnt">${items.length}</span></div><div class="grid">${items.map(cardHTML).join("")}</div>`
       : `<div class="grid"><div class="empty"><div class="big">Sin resultados</div>Prueba con otro nombre o código, o cambia de categoría.</div></div>`;
   } else {
-    const items = PRODUCTS.filter(p=> p.cat===activeCat && (!q || normalizeSearch(p.name+" "+p.sku).includes(q))).sort(nameCompare);
+    const items = PRODUCTS.filter(p=> p.cat===activeCat && visible(p) && (!q || normalizeSearch(p.name+" "+p.sku).includes(q))).sort(nameCompare);
     html = items.length
       ? `<div class="cat-label"><h2>${esc(activeCat)}</h2><span class="rule"></span><span class="cnt">${items.length}</span></div><div class="grid">${items.map(cardHTML).join("")}</div>`
       : `<div class="grid"><div class="empty"><div class="big">Sin resultados</div>Prueba con otro nombre o código, o cambia de categoría.</div></div>`;
@@ -631,8 +633,8 @@ document.getElementById("search").addEventListener("input", e=>{
 function clearSearch(){ query=""; document.getElementById("search").value=""; document.getElementById("clearSearch").style.display="none"; renderCatalog(); }
 
 /* ---- modo edición ---- */
-function tryAdmin(){ const c = prompt("Clave de edición:"); if(c===null) return; if(ADMIN_CODES.includes(c)) document.body.classList.add("admin"); else alert("Clave incorrecta."); }
-function exitAdmin(){ document.body.classList.remove("admin"); }
+function tryAdmin(){ const c = prompt("Clave de edición:"); if(c===null) return; if(ADMIN_CODES.includes(c)){ document.body.classList.add("admin"); renderCatalog(); } else alert("Clave incorrecta."); }
+function exitAdmin(){ document.body.classList.remove("admin"); renderCatalog(); }
 
 function toggleStock(sku){
   if(!document.body.classList.contains("admin")) return;
