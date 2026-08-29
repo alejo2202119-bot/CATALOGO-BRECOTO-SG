@@ -124,6 +124,16 @@
   .lightbox img{max-width:min(92vw,520px); max-height:80vh; width:100%; height:auto; object-fit:contain; border-radius:14px; background:#fff; box-shadow:0 20px 50px rgba(0,0,0,.5);}
   .lightbox .lb-close{position:absolute; top:18px; right:18px; width:40px; height:40px; border-radius:50%; border:none; background:rgba(255,255,255,.14); color:#fff; font-size:22px; line-height:1; cursor:pointer; display:flex; align-items:center; justify-content:center;}
   .lightbox .lb-name{position:absolute; left:0; right:0; bottom:22px; text-align:center; color:#fff; font-family:'Archivo'; font-weight:700; font-size:14px; padding:0 20px; text-transform:uppercase;}
+
+  /* ===== AVISO PARA PEGAR PEDIDO LARGO ===== */
+  .paste-modal{position:fixed; inset:0; z-index:90; background:rgba(20,26,34,.55); display:flex; align-items:center; justify-content:center; padding:20px; opacity:0; pointer-events:none; transition:opacity .2s;}
+  .paste-modal.open{opacity:1; pointer-events:auto;}
+  .paste-card{background:var(--surface); border-radius:20px; box-shadow:var(--shadow-lg); max-width:380px; width:100%; padding:28px 24px 24px; text-align:center;}
+  .paste-icon{font-size:38px; line-height:1; margin-bottom:10px;}
+  .paste-card h3{margin:0 0 8px; font-family:'Archivo'; font-size:19px; color:var(--ink);}
+  .paste-sub{margin:0 0 16px; font-size:13.5px; color:var(--muted); line-height:1.5;}
+  .paste-steps{text-align:left; margin:0 0 20px; padding-left:22px; font-size:14px; color:var(--ink); line-height:1.9;}
+  .paste-ok{width:100%; border:none; border-radius:14px; padding:14px; background:var(--green); color:#fff; font-family:'Archivo'; font-weight:700; font-size:15px; cursor:pointer;}
   .price-pending{font-family:'IBM Plex Mono'; font-size:11.5px; color:var(--muted); font-style:italic;}
   .overlay.open{opacity:1; pointer-events:auto;}
   .drawer{position:fixed; z-index:50; background:var(--surface); display:flex; flex-direction:column; left:0; right:0; bottom:0; max-height:88vh; border-radius:22px 22px 0 0; transform:translateY(100%); transition:transform .3s cubic-bezier(.2,.8,.2,1);}
@@ -281,6 +291,20 @@
   <button class="lb-close" onclick="closeLightbox(event)">✕</button>
   <img id="lightboxImg" src="" alt="">
   <div class="lb-name" id="lightboxName"></div>
+</div>
+
+<div class="paste-modal" id="pasteModal">
+  <div class="paste-card">
+    <div class="paste-icon">📋</div>
+    <h3>¡Ya copiamos tu pedido completo!</h3>
+    <p class="paste-sub">Tu pedido tiene muchos productos, así que para que llegue completo en un solo mensaje, sigue estos 3 pasos en WhatsApp:</p>
+    <ol class="paste-steps">
+      <li><b>Mantén presionado</b> el cuadro de texto donde escribes el mensaje</li>
+      <li>Toca <b>"Pegar"</b></li>
+      <li>Revisa y toca <b>enviar</b> ➤</li>
+    </ol>
+    <button class="paste-ok" onclick="closePasteModal()">Entendido</button>
+  </div>
 </div>
 
 <script>
@@ -608,11 +632,12 @@ async function sendWhatsapp(){
   if(Object.keys(cart).length===0) return;
   const fullMsg = buildOrderMessage();
   const fullUrl = buildWaUrl(fullMsg);
-  // los enlaces de WhatsApp con pedidos muy largos se pueden truncar en algunos
-  // celulares/navegadores; por encima de este largo, copiamos el pedido completo
-  // al portapapeles y abrimos el chat con un mensaje corto para pegarlo, así no
-  // hay límite de cuántos productos se pueden pedir.
-  const LARGO_SEGURO = 1800;
+  // los enlaces de WhatsApp tienen un límite de longitud que varía según el
+  // celular/navegador; este umbral es generoso (cubre pedidos de más de 25
+  // productos distintos) para que la inmensa mayoría de los pedidos se envíen
+  // de una vez, y solo pedidos realmente enormes usen el copiado automático,
+  // que no tiene ningún límite de tamaño.
+  const LARGO_SEGURO = 4200;
   let url = fullUrl, usedClipboard = false;
 
   if(fullUrl.length > LARGO_SEGURO){
@@ -638,8 +663,15 @@ async function sendWhatsapp(){
     window.location.href = url;
   }
   if(usedClipboard){
-    alert("Tu pedido completo se copió. En WhatsApp, mantén presionado el campo de texto, toca \"Pegar\" y luego envíalo.");
+    openPasteModal();
   }
+}
+
+function openPasteModal(){
+  document.getElementById("pasteModal").classList.add("open");
+}
+function closePasteModal(){
+  document.getElementById("pasteModal").classList.remove("open");
 }
 
 /* ---- búsqueda ---- */
