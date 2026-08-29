@@ -574,7 +574,7 @@ function renderDrawer(){
 function openCart(){ document.getElementById("drawer").classList.add("open"); document.getElementById("overlay").classList.add("open"); }
 function closeCart(){ document.getElementById("drawer").classList.remove("open"); document.getElementById("overlay").classList.remove("open"); }
 
-function buildWaUrl(){
+function buildOrderMessage(){
   const now = new Date(), pad = n=>String(n).padStart(2,"0");
   const num = `${now.getFullYear()}${pad(now.getMonth()+1)}${pad(now.getDate())}-${pad(now.getHours())}${pad(now.getMinutes())}`;
   const fecha = `${pad(now.getDate())}/${pad(now.getMonth()+1)}/${now.getFullYear()} ${pad(now.getHours())}:${pad(now.getMinutes())}`;
@@ -585,7 +585,7 @@ function buildWaUrl(){
     const sub = p.price*q; total += sub; unidades += q;
     return `${i+1}. ${p.name} (${p.sku})\n   Cantidad: ${q} · USD ${p.price.toFixed(2)} c/u · Subtotal: USD ${sub.toFixed(2)}`;
   });
-  const msg = [
+  return [
     "*PEDIDO BRECOTO*",
     `N° ${num} · ${fecha}`,
     "",
@@ -599,12 +599,33 @@ function buildWaUrl(){
     "",
     "Quedo atento para coordinar pago y entrega. ¡Gracias!"
   ].join("\n");
-  return `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(msg)}`;
+}
+function buildWaUrl(text){
+  return `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(text)}`;
 }
 
-function sendWhatsapp(){
+async function sendWhatsapp(){
   if(Object.keys(cart).length===0) return;
-  const url = buildWaUrl();
+  const fullMsg = buildOrderMessage();
+  const fullUrl = buildWaUrl(fullMsg);
+  // los enlaces de WhatsApp con pedidos muy largos se pueden truncar en algunos
+  // celulares/navegadores; por encima de este largo, copiamos el pedido completo
+  // al portapapeles y abrimos el chat con un mensaje corto para pegarlo, así no
+  // hay límite de cuántos productos se pueden pedir.
+  const LARGO_SEGURO = 1800;
+  let url = fullUrl, usedClipboard = false;
+
+  if(fullUrl.length > LARGO_SEGURO){
+    const shortMsg = "Hola, quiero hacer un pedido. Copié el detalle completo, lo pego a continuación 👇";
+    try{
+      await navigator.clipboard.writeText(fullMsg);
+      usedClipboard = true;
+    }catch(e){
+      window.prompt("No se pudo copiar automáticamente. Copia este texto (selecciona todo y copia) y pégalo en WhatsApp:", fullMsg);
+    }
+    url = buildWaUrl(shortMsg);
+  }
+
   // respaldo visible siempre
   const fb = document.getElementById("waFallback");
   fb.href = url; fb.style.display = "block";
@@ -615,6 +636,9 @@ function sendWhatsapp(){
     document.body.appendChild(a); a.click(); a.remove();
   }catch(e){
     window.location.href = url;
+  }
+  if(usedClipboard){
+    alert("Tu pedido completo se copió. En WhatsApp, mantén presionado el campo de texto, toca \"Pegar\" y luego envíalo.");
   }
 }
 
